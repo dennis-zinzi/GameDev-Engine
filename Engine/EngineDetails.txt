@@ -1,0 +1,8 @@
+Graphics: NCLGL
+Physics: Bullet
+Resource Management: ?
+Human Interface: ?
+Audio: ?
+Initialize/Shutdown: ?
+Profiling: ?
+File I/O: ?
