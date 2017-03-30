@@ -6,6 +6,8 @@
 #include "../NCLGL/nclgl/Shader.h"
 #include "../NCLGL/nclgl/OGLRenderer.h"
 
+//#pragma comment(lib, "nclgl.lib")
+
 class RenderObject{
 	public:
 		RenderObject();

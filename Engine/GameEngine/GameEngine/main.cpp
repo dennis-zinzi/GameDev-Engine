@@ -1,22 +1,30 @@
 #include "../Renderer/Renderer.h"
 
+#pragma comment(lib, "nclgl.lib")
+#pragma comment(lib, "Renderer.lib")
+
 #define SHADER_DIR "../Assets/Shaders/"
 #define MESH_DIR "../Assets/Meshes/"
 
-void RenderingCycle(Renderer &r, float msec){
-	r.UpdateScene(msec);
-	r.ClearBuffers();
-	r.RenderScene();
-	r.SwapBuffers();
-}
 
 int main(){
 	//Initialize window
 	Window w("GameDev Engine", 1200, 720);
+	if(!w.HasInitialised()) {
+		return -1;
+	}
 
 	//Initialize renderer
 	Renderer renderer(w);
+	if(!renderer.HasInitialised()) {
+		return -1;
+	}
 
+	//Set window to render stuff in
+	w.SetRenderer(&renderer);
+
+	//Create world objects here
+	//TODO - Load from text files in Game dir to dynamically create them
 	Mesh *m = Mesh::LoadMeshFile(MESH_DIR"cube.asciimesh");
 	Shader *s = new Shader(SHADER_DIR"BasicVert.glsl", SHADER_DIR"BasicFrag.glsl");
 
@@ -29,16 +37,22 @@ int main(){
 	renderer.setViewMatrix(Matrix4::BuildViewMatrix(Vector3(0, 0, -20), Vector3(0, 0, -10)));
 
 
-	while(w.UpdateWindow()){
+	while(w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)){
 		float msec = w.GetTimer()->GetTimedMS();
 
 		
-		ro.setModelMatrix(ro.getModelMatrix() * Matrix4::Rotation(0.1f * msec, Vector3(0, 1, 1)));
+		ro.setModelMatrix(ro.getModelMatrix() * Matrix4::Rotation(1.0f * msec, Vector3(0, 1, 1)));
 
 		//Graphics update
-		RenderingCycle(renderer, msec);
+		renderer.UpdateScene(msec);
+		renderer.ClearBuffers();
+		renderer.RenderScene();
+		renderer.SwapBuffers();
 	}
 
+	//TODO - delete all pointers to avoid memory leaks
+	delete &renderer;
+	
 
 	return 0;
 }

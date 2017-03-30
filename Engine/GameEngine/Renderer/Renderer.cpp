@@ -11,10 +11,17 @@ Renderer::Renderer(Window &window) : OGLRenderer(window){
 	//Enable Alpha blending
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	init = true;
 }
 
 Renderer::~Renderer(){
 	//Delete textures in here
+
+	//Delete all render objects
+	for(auto obj : objectsToRender){
+		delete obj;
+	}
 }
 
 

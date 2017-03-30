@@ -61,6 +61,11 @@
     <ClInclude Include="Vector4.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SOIL\SLN\SOIL.vcxproj">
+      <Project>{c32fb2b4-500c-43cd-a099-eecce079d3f1}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{98D6B51B-CB0A-4389-ADC6-24082B967C3F}</ProjectGuid>
     <RootNamespace>Shared</RootNamespace>
@@ -70,7 +75,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>

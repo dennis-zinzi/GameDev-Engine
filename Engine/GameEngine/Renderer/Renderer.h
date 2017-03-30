@@ -3,6 +3,8 @@
 #include "../NCLGL/nclgl/OGLRenderer.h"
 #include "RenderObject.h"
 
+#pragma comment(lib, "nclgl.lib")
+
 class Renderer : public OGLRenderer{
 	public:
 		Renderer(Window &parent);

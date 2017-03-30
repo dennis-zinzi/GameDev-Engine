@@ -17,6 +17,18 @@ RenderObject::RenderObject(Mesh *m, Shader *s, GLuint tex){
 
 
 RenderObject::~RenderObject(){
+	delete mesh;
+	delete shader;
+
+	//Unbind tex
+
+	//Set parent to NULL
+	parent = nullptr;
+
+	//delete children
+	for(auto child : children){
+		delete child;
+	}
 }
 
 
