@@ -13,17 +13,32 @@ _-_-_-_-_-_-_-""  ""
 
 */
 
+#pragma comment(lib, "opengl32.lib")	//The actual OGL Library
+
+#ifdef _DEBUG
+#pragma comment(lib, "glew32.lib")		//GLEW static library bit, so we don't use the dll any more
+#else 
+#pragma comment(lib, "glew32.lib")		//GLEW static library bit, so we don't use the dll any more
+#endif
+
+#pragma comment(lib, "SOIL.lib")		//SOIL, used to load in images
 
 #include "OGLRenderer.h"
+#include <string>
+#include <iostream>
 
-DebugDrawData* OGLRenderer::orthoDebugData			= NULL;
-DebugDrawData* OGLRenderer::perspectiveDebugData	= NULL;
-OGLRenderer*   OGLRenderer::debugDrawingRenderer	= NULL;
-Shader*		   OGLRenderer::debugDrawShader			= NULL;
+using std::string;
+using std::cout;
+using std::endl;
 
-bool		   OGLRenderer::drawnDebugOrtho			= false;
-bool		   OGLRenderer::drawnDebugPerspective	= false;
+int	OGLRenderer::width	= 0;	//Render area width (not quite the same as window width)
+int	OGLRenderer::height = 0;	//Render area height (not quite the same as window height)
 
+void OGLRenderer::BasicResizeFunc(int x, int y) {
+	OGLRenderer::width	= x;
+	OGLRenderer::height = y;
+	glViewport(0, 0, OGLRenderer::width, OGLRenderer::height);
+}
 
 /*
 Creates an OpenGL 3.2 CORE PROFILE rendering context. Sets itself
@@ -32,8 +47,6 @@ way to do it - but it kept the Tutorial code down to a minimum!
 */
 OGLRenderer::OGLRenderer(Window &window)	{
 	init					= false;
-	drawnDebugOrtho			= false;
-	drawnDebugPerspective	= false;
 
 	HWND windowHandle = window.GetHandle();
 
@@ -134,37 +147,21 @@ OGLRenderer::OGLRenderer(Window &window)	{
 	//If we get this far, everything's going well!
 
 #ifdef OPENGL_DEBUGGING
-	//PFNWGLCREATECONTEXTATTRIBSARBPROC glDebugMessageCallbackTEMP = (PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("glDebugMessageCallbackARB");
-	glDebugMessageCallbackARB(&OGLRenderer::DebugCallback, NULL);
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+	if (major >= 4 && minor >= 0) {
+		glDebugMessageCallback((GLDEBUGPROC)&OGLRenderer::DebugCallback, NULL);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+	}
 #endif
 
 	glClearColor(0.2f,0.2f,0.2f,1.0f);			//When we clear the screen, we want it to be dark grey
 
-	currentShader = 0;							//0 is the 'null' object name for shader programs...
-
-	window.SetRenderer(this);					//Tell our window about the new renderer! (Which will in turn resize the renderer window to fit...)
-
-	if(!debugDrawingRenderer) {
-		debugDrawShader		 = new Shader(SHADERDIR"debugVertex.glsl", SHADERDIR"debugFragment.glsl");
-		orthoDebugData		 = new DebugDrawData();
-		perspectiveDebugData = new DebugDrawData();
-		debugDrawingRenderer = this;	
-		
-		if(!debugDrawShader->LinkProgram()) {
-			return;
-		}
-	}
+	window.RegisterResizeCallback(BasicResizeFunc);//Tell our window about the new renderer! (Which will in turn resize the renderer window to fit...)		
 }
 
 /*
 Destructor. Deletes the default shader, and the OpenGL rendering context.
 */
 OGLRenderer::~OGLRenderer(void)	{
-	delete orthoDebugData;
-	delete perspectiveDebugData;
-	delete currentShader;
-	delete debugDrawShader;
 	wglDeleteContext(renderContext);
 }
 
@@ -193,17 +190,6 @@ every frame, at the end of RenderScene(), or whereever appropriate for
 your application.
 */
 void OGLRenderer::SwapBuffers() {
-	if(debugDrawingRenderer == this) {
-		if(!drawnDebugOrtho) {
-			DrawDebugOrtho();
-		}
-		if(!drawnDebugPerspective) {
-			DrawDebugPerspective();
-		}
-		drawnDebugOrtho			= false;
-		drawnDebugPerspective	= false;
-	}
-
 	//We call the windows OS SwapBuffers on win32. Wrapping it in this 
 	//function keeps all the tutorial code 100% cross-platform (kinda).
 	::SwapBuffers(deviceContext);
@@ -229,39 +215,27 @@ projMatrix, and textureMatrix. Updates them with the relevant
 matrix data. Sanity checks currentShader, so is always safe to
 call.
 */
-void OGLRenderer::UpdateShaderMatrices()	{
-	if(currentShader) {
-		glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"),	1,false, (float*)&modelMatrix);
-		glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "viewMatrix") ,	1,false, (float*)&viewMatrix);
-		glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "projMatrix") ,	1,false, (float*)&projMatrix);
-		glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix")  ,1,false, (float*)&textureMatrix);
-	}
+void OGLRenderer::UpdateShaderMatrices(GLuint program)	{
+	glUniformMatrix4fv(glGetUniformLocation(program, "modelMatrix")  , 1, false, (float*)&modelMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(program, "viewMatrix")   , 1, false, (float*)&viewMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix")   , 1, false, (float*)&projMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(program, "textureMatrix"), 1, false, (float*)&textureMatrix);
 }
 
-void OGLRenderer::SetCurrentShader(Shader*s) {
-	currentShader = s;
-
-	if(s){
-		glUseProgram(s->GetProgram());
-	}
-}
-
-void OGLRenderer::SetTextureRepeating( GLuint target, bool repeating )	{
-	glBindTexture(GL_TEXTURE_2D, target);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeating ? GL_REPEAT : GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeating ? GL_REPEAT : GL_CLAMP);
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-//void OGLRenderer::SetShaderLight(const Light &l) {
-//	glUniform3fv(glGetUniformLocation(currentShader->GetProgram(), "lightPos")   ,1,(float*)&l.GetPosition());
-//	glUniform4fv(glGetUniformLocation(currentShader->GetProgram(), "lightColour"),1,(float*)&l.GetColour());
-//	glUniform1f(glGetUniformLocation(currentShader->GetProgram() , "lightRadius"),l.GetRadius());
+//void OGLRenderer::SetCurrentShader(Shader*s) {
+//	currentShader = s;
+//
+//	glUseProgram(s->GetProgram());
 //}
 
+void	OGLRenderer::ClearBuffers() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+
 #ifdef OPENGL_DEBUGGING
-void OGLRenderer::DebugCallback(GLuint source, GLuint type,GLuint id, GLuint severity,
-	int length, const char* message, void* userParam)	{
+void OGLRenderer::DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
+	GLsizei length, const GLchar* message, void* userParam)	{
 
 		string sourceName;
 		string typeName;
@@ -294,132 +268,3 @@ void OGLRenderer::DebugCallback(GLuint source, GLuint type,GLuint id, GLuint sev
 		cout << "OpenGL Debug Output: " + sourceName + ", " + typeName + ", " + severityName + ", " + string(message) << endl;
 }
 #endif
-
-void	OGLRenderer::DrawDebugPerspective(Matrix4*matrix)  {
-	glUseProgram(debugDrawShader->GetProgram());
-
-	if(matrix) {
-		glUniformMatrix4fv(glGetUniformLocation(debugDrawShader->GetProgram(), "viewProjMatrix"),	1,false, (float*)matrix);
-	}
-	else{
-		Matrix4 temp = projMatrix*viewMatrix;
-		glUniformMatrix4fv(glGetUniformLocation(debugDrawShader->GetProgram(), "viewProjMatrix"),	1,false, (float*)&temp);
-	}
-
-	perspectiveDebugData->Draw();
-	
-	perspectiveDebugData->Clear();
-	drawnDebugPerspective = true;
-	SetCurrentShader(currentShader);
-}
-
-
-void	OGLRenderer::DrawDebugOrtho(Matrix4*matrix) {
-	glUseProgram(debugDrawShader->GetProgram());
-
-	if(matrix) {
-		glUniformMatrix4fv(glGetUniformLocation(debugDrawShader->GetProgram(), "viewProjMatrix"),	1,false, (float*)matrix);
-	}
-	else{
-		static Matrix4 ortho = Matrix4::Orthographic(-1,1,720,0,0,480);
-		glUniformMatrix4fv(glGetUniformLocation(debugDrawShader->GetProgram(), "viewProjMatrix"),	1,false, (float*)&ortho);
-	}
-
-	orthoDebugData->Draw();
-
-	orthoDebugData->Clear();
-	drawnDebugOrtho = true;
-	SetCurrentShader(currentShader);
-}
-
-void	OGLRenderer::DrawDebugLine  (DebugDrawMode mode, const Vector3 &from,const Vector3 &to,const Vector3 &fromColour,const Vector3 &toColour) {
-	DebugDrawData*target = (mode == DEBUGDRAW_ORTHO ? target = orthoDebugData : target = perspectiveDebugData);
-
-	target->AddLine(from,to,fromColour,toColour);
-}
-
-void	OGLRenderer::DrawDebugBox   (DebugDrawMode mode, const Vector3 &at,const Vector3 &scale,const Vector3 &colour) {
-	DebugDrawData*target = (mode == DEBUGDRAW_ORTHO ? target = orthoDebugData : target = perspectiveDebugData);
-
-	target->AddLine(at + Vector3(-scale.x * 0.5f, scale.y * 0.5f, 0),
-					at + Vector3(-scale.x * 0.5f, -scale.y * 0.5f, 0),colour,colour);
-
-	target->AddLine(at + Vector3(-scale.x * 0.5f, -scale.y * 0.5f, 0),
-					at + Vector3(scale.x * 0.5f, -scale.y * 0.5f,0 ),colour,colour);
-
-	target->AddLine(at + Vector3(scale.x * 0.5f, -scale.y * 0.5f,0),
-					at + Vector3(scale.x * 0.5f, scale.y * 0.5f,0),colour,colour);
-
-	target->AddLine(at + Vector3(scale.x * 0.5f, scale.y * 0.5f,0),
-					at + Vector3(-scale.x * 0.5f, scale.y * 0.5f,0),colour,colour);
-
-}
-
-void	OGLRenderer::DrawDebugCross (DebugDrawMode mode, const Vector3 &at,const Vector3 &scale,const Vector3 &colour) {
-	DebugDrawData*target = (mode == DEBUGDRAW_ORTHO ? target = orthoDebugData : target = perspectiveDebugData);
-
-	target->AddLine(at + Vector3(-scale.x * 0.5f,-scale.y * 0.5f, 0),
-		at + Vector3(scale.x * 0.5f, scale.y * 0.5f, 0),colour,colour);
-
-	target->AddLine(at + Vector3(scale.x * 0.5f, -scale.y * 0.5f, 0),
-		at + Vector3(-scale.x * 0.5f, scale.y * 0.5f, 0),colour,colour);
-
-}
-
-void	OGLRenderer::DrawDebugCircle(DebugDrawMode mode, const Vector3 &at, const float radius,const Vector3 &colour) {
-	DebugDrawData*target = (mode == DEBUGDRAW_ORTHO ? target = orthoDebugData : target = perspectiveDebugData);
-
-	const int stepCount = 18;
-	const float divisor = 360.0f / stepCount;
-
-
-	for(int i = 0; i < stepCount; ++i) {
-
-		float startx = radius * (float)cos(DegToRad(i * divisor))		+ at.x;
-		float endx	 = radius * (float)cos(DegToRad((i+1) * divisor))	+ at.x;
-
-
-		float starty = radius * (float)sin(DegToRad(i * divisor))		+ at.y;
-		float endy	 = radius * (float)sin(DegToRad((i+1) * divisor))	+ at.y;
-
-		target->AddLine(Vector3(startx,starty,0),
-			Vector3(endx,endy,0),colour,colour);
-	}
-}
-
-
-
-
-DebugDrawData::DebugDrawData() {
-	glGenVertexArrays(1, &array);
-	glGenBuffers(2, buffers);	
-}
-
-void DebugDrawData::Draw() {
-	if(lines.empty()) {
-		return;
-	}
-	glBindVertexArray(array);
-	glGenBuffers(2, buffers);
-
-	glBindBuffer(GL_ARRAY_BUFFER,buffers[VERTEX_BUFFER]);
-	glBufferData(GL_ARRAY_BUFFER,lines.size()*sizeof(Vector3), &lines[0], GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(VERTEX_BUFFER, 3, GL_FLOAT, GL_FALSE, 0, 0); 
-	glEnableVertexAttribArray(VERTEX_BUFFER);
-
-	glBindBuffer(GL_ARRAY_BUFFER,buffers[COLOUR_BUFFER]);
-	glBufferData(GL_ARRAY_BUFFER,colours.size()*sizeof(Vector3), &colours[0], GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(COLOUR_BUFFER, 3, GL_FLOAT, GL_FALSE, 0, 0); 
-	glEnableVertexAttribArray(COLOUR_BUFFER);
-
-	glDrawArrays(GL_LINES,0,lines.size());
-
-	glBindVertexArray(0);
-	glDeleteBuffers(2,buffers);
-
-	Clear();
-}
-
-void OGLRenderer::ClearBuffers(){
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}

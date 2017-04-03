@@ -1,5 +1,7 @@
 #include "Mouse.h"
 
+Mouse* Mouse::instance = 0;
+
 Mouse::Mouse(HWND &hwnd)	{
 	ZeroMemory( buttons,	 sizeof(bool) * MOUSE_MAX );
 	ZeroMemory( holdButtons, sizeof(bool) * MOUSE_MAX );
@@ -17,6 +19,14 @@ Mouse::Mouse(HWND &hwnd)	{
     rid.dwFlags		= RIDEV_INPUTSINK;   
     rid.hwndTarget	= hwnd;
     RegisterRawInputDevices(&rid, 1, sizeof(rid));
+}
+
+void Mouse::Initialise(HWND &hwnd) {
+	instance = new Mouse(hwnd);
+}
+
+void Mouse::Destroy() {
+	delete instance;
 }
 
 void Mouse::Update(RAWINPUT* raw)	{
@@ -138,8 +148,8 @@ void	Mouse::SetAbsolutePosition(unsigned int x, unsigned int y)	{
 Returns if the button is down. Doesn't need bounds checking - 
 an INPUT_KEYS enum is always in range
 */
-bool Mouse::ButtonDown(MouseButtons b)	{
-	return buttons[b];
+bool Mouse::ButtonDown(MouseButtons b) {
+	return instance->buttons[b];
 }
 
 /*
@@ -147,21 +157,21 @@ Returns if the button is down, and has been held down for multiple updates.
 Doesn't need bounds checking - an INPUT_KEYS enum is always in range
 */
 bool Mouse::ButtonHeld(MouseButtons b)	{
-	return holdButtons[b];
+	return instance->holdButtons[b];
 }
 
 /*
 Returns how much the mouse has moved by since the last frame.
 */
-Vector2	Mouse::GetRelativePosition()	{
-	return relativePosition;
+Vector2	Mouse::GetRelativePosition() {
+	return instance->relativePosition;
 }
 
 /*
 Returns the mouse pointer position in absolute space.
 */
-Vector2 Mouse::GetAbsolutePosition()	{
-	return absolutePosition;
+Vector2 Mouse::GetAbsolutePosition() {
+	return instance->absolutePosition;
 }
 
 /*
@@ -176,14 +186,14 @@ void Mouse::SetAbsolutePositionBounds(unsigned int maxX, unsigned int maxY)	{
 Has the mousewheel been moved since the last frame?
 */
 bool	Mouse::WheelMoved()	{
-	return frameWheel != 0;
+	return instance->frameWheel != 0;
 };
 
 /*
 Returns whether the button was double clicked in this frame
 */
 bool Mouse::DoubleClicked(MouseButtons button)	{
-	return (buttons[button] && doubleClicks[button]);
+	return (instance->buttons[button] && instance->doubleClicks[button]);
 }
 
 /*
@@ -191,7 +201,7 @@ Get the mousewheel movement. Positive values mean the mousewheel
 has moved up, negative down. Can be 0 (no movement)
 */
 int		Mouse::GetWheelMovement()	{
-	return (int)frameWheel;
+	return (int)instance->frameWheel;
 }
 
 /*

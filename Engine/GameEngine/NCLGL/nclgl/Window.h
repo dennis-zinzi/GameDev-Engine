@@ -1,76 +1,59 @@
-/*
-Class:Window
-Author:Rich Davison
-Description:Creates and handles the Window, including the initialisation of the mouse and keyboard.
-*/
 #pragma once
-#pragma warning( disable : 4099 )
+#include "Common.h"
 
-#include <string>
-
-#include <windows.h>
-#include <io.h>
-#include <stdio.h>
-#include <fcntl.h>
-
-#include "OGLRenderer.h"
-#include "Keyboard.h"
 #include "Mouse.h"
+#include "Keyboard.h"
 #include "GameTimer.h"
 
+#include <vector>
+
+#include <windows.h>
+#include <fcntl.h>
+
+//These two defines cut a lot of crap out of the Windows libraries
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
+
 #define WINDOWCLASS "WindowClass"
 
-class OGLRenderer;
+typedef void(*ResizeCallbackFunction) (int x, int y);
 
+//This is the OS-specific crap required to render our pixel blocks on screen
 class Window	{
 public:
-	Window(std::string title = "OpenGL Framework", int sizeX = 800, int sizeY = 600, bool fullScreen = false);
+	Window(const char *name, uint width, uint height);
 	~Window(void);
 
 	bool	UpdateWindow();	
 
-	void	SetRenderer(OGLRenderer* r);
+	HWND	GetHandle() { return windowHandle; }
 
-	HWND	GetHandle();
+	void RegisterResizeCallback(ResizeCallbackFunction func);
 
-	bool	HasInitialised();
-
-	void	LockMouseToWindow(bool lock);
-	void	ShowOSPointer(bool show);
-
-	Vector2	GetScreenSize() {return size;};
-
-	static Keyboard*	GetKeyboard()	{return keyboard;}
-	static Mouse*		GetMouse()		{return mouse;}
-
-	GameTimer*   GetTimer()		{return timer;}
-
+	GameTimer* GetTimer() {
+		return &timer;
+	}
 protected:
-	void	CheckMessages(MSG &msg);
-	static LRESULT CALLBACK WindowProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam);
+	void CheckMessages(MSG &msg);
 
-	HWND			windowHandle;
+	void Resize();
 
-	static Window*		window;
-	static Keyboard*	keyboard;
-	static Mouse*		mouse;
+	//Windows requires a static callback function to handle certain incoming messages.
+	static LRESULT CALLBACK StaticWindowProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam);
 
-	GameTimer*	timer;
+	LRESULT WindowProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam);
 
-	OGLRenderer*		renderer;
+	HWND	windowHandle;	//OS handle
+	HDC		deviceContext;
 
-	bool				forceQuit;
-	bool				init;
-	bool				fullScreen;
-	bool				lockMouse;
-	bool				showMouse;
+	uint	screenWidth;
+	uint	screenHeight;
 
-	Vector2				position;
-	Vector2				size;
+	bool	forceQuit;
+	bool	hasInit;
 
-	float				elapsedMS;
+	GameTimer timer;
 
-	bool				mouseLeftWindow;
+	std::vector<ResizeCallbackFunction> resizeListeners;
 };
+

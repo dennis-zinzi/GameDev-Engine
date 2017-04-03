@@ -35,6 +35,46 @@ public:
 	//Sets matrix to identity matrix (1.0 down the diagonal)
 	void	ToIdentity();
 
+	void SetRow(unsigned int row, const Vector4 &val) {
+		if(row <= 3) {
+			int start = 4*row;
+
+			values[start+=4] = val.x;
+			values[start+=4] = val.y;
+			values[start+=4] = val.z;
+			values[start+=4] = val.w;
+		}
+	}
+
+	void SetColumn(unsigned int column, const Vector4 &val) {
+		if(column <= 3) {
+			memcpy(&values[4*column],&val,sizeof(Vector4));
+		}
+	}
+
+	Vector4 GetRow(unsigned int row) {
+		Vector4 out(0,0,0,1);
+		if(row <= 3) {
+			int start = 4*row;
+
+			out.x = values[start+=4];
+			out.y = values[start+=4];
+			out.z = values[start+=4];
+			out.w = values[start+=4];
+		}
+		return out;
+	}
+
+	Vector4 GetColumn(unsigned int column) {
+		Vector4 out(0,0,0,1);
+
+		if(column <= 3) {
+			memcpy(&out,&values[4*column],sizeof(Vector4));
+		}
+
+		return out;
+	}
+
 	//Gets the OpenGL position vector (floats 12,13, and 14)
 	Vector3 GetPositionVector() const;
 	//Sets the OpenGL position vector (floats 12,13, and 14)
@@ -71,8 +111,6 @@ public:
 	//'up' as the...up axis (pointing towards the top of the screen)
 	static Matrix4 BuildViewMatrix(const Vector3 &from, const Vector3 &lookingAt, const Vector3 up = Vector3(0,1,0));
 
-	Matrix4 GetTransposedRotation();
-
 	//Multiplies 'this' matrix by matrix 'a'. Performs the multiplication in 'OpenGL' order (ie, backwards)
 	inline Matrix4 operator*(const Matrix4 &a) const{	
 		Matrix4 out;
@@ -106,7 +144,7 @@ public:
 		return vec;
 	};
 
-		inline Vector4 operator*(const Vector4 &v) const {
+	inline Vector4 operator*(const Vector4 &v) const {
 		return Vector4(
 			v.x*values[0] + v.y*values[4] + v.z*values[8]  +v.w * values[12],
 			v.x*values[1] + v.y*values[5] + v.z*values[9]  +v.w * values[13],
@@ -118,10 +156,10 @@ public:
 	//Handy string output for the matrix. Can get a bit messy, but better than nothing!
 	inline friend std::ostream& operator<<(std::ostream& o, const Matrix4& m){
 		o << "Mat4(";
-		o << "\t"	<< m.values[0] << "," << m.values[1] << "," << m.values[2] << "," << m.values [3] << std::endl;
-		o << "\t\t" << m.values[4] << "," << m.values[5] << "," << m.values[6] << "," << m.values [7] << std::endl;
-		o << "\t\t" << m.values[8] << "," << m.values[9] << "," << m.values[10] << "," << m.values [11] << std::endl;
-		o << "\t\t" << m.values[12] << "," << m.values[13] << "," << m.values[14] << "," << m.values [15] << " )" <<std::endl;
+		o << "\t"	<< m.values[0] << "," << m.values[4] << "," << m.values[8] << "," << m.values [12] << std::endl;
+		o << "\t\t" << m.values[1] << "," << m.values[5] << "," << m.values[9] << "," << m.values [13] << std::endl;
+		o << "\t\t" << m.values[2] << "," << m.values[6] << "," << m.values[10] << ","<< m.values [14] << std::endl;
+		o << "\t\t" << m.values[3]<< "," << m.values[7]<< "," << m.values[11] << ","<< m.values [15] << " )" <<std::endl;
 		return o;
 	}
 };

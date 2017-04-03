@@ -90,9 +90,6 @@ Matrix4 Matrix4::BuildViewMatrix(const Vector3 &from, const Vector3 &lookingAt, 
 	Vector3 s = Vector3::Cross(f,up);
 	Vector3 u = Vector3::Cross(s,f);
 
-	s.Normalise();
-	u.Normalise();
-
 	m.values[0] = s.x;
 	m.values[4] = s.y;
 	m.values[8] = s.z;
@@ -151,18 +148,4 @@ Matrix4 Matrix4::Translation( const Vector3 &translation )	{
 	m.values[14] = translation.z;	
 
 	return m;
-}
-
-Matrix4 Matrix4::GetTransposedRotation() {
-	Matrix4 temp;
-	temp.values[0] = values[0];
-	temp.values[5] = values[5];
-	temp.values[10] = values[10];
-	temp.values[1] = values[4];
-	temp.values[4] = values[1];
-	temp.values[2] = values[8];
-	temp.values[8] = values[2];
-	temp.values[6] = values[9];
-	temp.values[9] = values[6];
-	return temp;
 }

@@ -10,7 +10,7 @@ GameTimer::GameTimer(void)	{
 /*
 Returns the Milliseconds since timer was started
 */
-float GameTimer::GetMS() {
+float GameTimer::GetMS() const {
 	LARGE_INTEGER t;	
 	QueryPerformanceCounter(&t);
 	return (float)((t.QuadPart  - start.QuadPart) * 1000.0 / frequency.QuadPart);

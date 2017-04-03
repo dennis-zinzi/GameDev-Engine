@@ -1,7 +1,7 @@
 /******************************************************************************
 Class:Mouse
 Implements:InputDevice
-Author:Rich Davison
+Author:Rich Davison	<richard.davison4@newcastle.ac.uk>
 Description:Windows RAW input mouse, with a couple of game-related enhancements
 
 -_-_-_-_-_-_-_,------,   
@@ -33,26 +33,26 @@ public:
 	friend class Window;
 
 	//Is this mouse button currently pressed down?
-	bool	ButtonDown(MouseButtons button);
+	static bool	ButtonDown(MouseButtons button) ;
 	//Has this mouse button been held down for multiple frames?
-	bool	ButtonHeld(MouseButtons button);
+	static bool	ButtonHeld(MouseButtons button) ;
 	//Has this mouse button been double clicked?
-	bool	DoubleClicked(MouseButtons button);
+	static bool	DoubleClicked(MouseButtons button) ;
 
 	//Get how much this mouse has moved since last frame
-	Vector2	GetRelativePosition();
+	static Vector2	GetRelativePosition() ;
 	//Get the window position of the mouse pointer
-	Vector2 GetAbsolutePosition();
+	static Vector2 GetAbsolutePosition() ;
 
 	//Determines the maximum amount of ms that can pass between
 	//2 mouse presses while still counting as a 'double click'
-	void	SetDoubleClickLimit(float msec);
+	static void	SetDoubleClickLimit(float msec);
 	
 	//Has the mouse wheel moved since the last update?
-	bool	WheelMoved();
+	static bool	WheelMoved() ;
 	//Get the mousewheel movement. Positive means scroll up,
 	//negative means scroll down, 0 means no movement.
-	int		GetWheelMovement();
+	static int		GetWheelMovement();
 
 	//Sets the mouse sensitivity. Currently only affects the 'relative'
 	//(i.e FPS-style) mouse movement. Students! Maybe you'd like to
@@ -62,6 +62,11 @@ public:
 protected:
 	Mouse(HWND &hwnd);
 	~Mouse(void){}
+
+	static void Initialise(HWND &hwnd);
+	static void Destroy();
+
+	static Mouse* instance;
 
 	//Internal function that updates the mouse variables from a 
 	//raw input 'packet'

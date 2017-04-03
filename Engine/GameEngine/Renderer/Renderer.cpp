@@ -19,9 +19,9 @@ Renderer::~Renderer(){
 	//Delete textures in here
 
 	//Delete all render objects
-	for(auto obj : objectsToRender){
-		delete obj;
-	}
+	//for(auto obj : objectsToRender){
+	//	delete obj;
+	//}
 }
 
 
@@ -29,13 +29,17 @@ void Renderer::RenderObj(const RenderObject &ro){
 	modelMatrix = ro.getWorldTransform();
 
 	if(ro.getShader() && ro.getMesh()){
-		GLuint program = ro.getShader()->GetProgram();
+		GLuint program = ro.getShader()->GetShaderProgram();
 
 		glUseProgram(program);
 
-		UpdateShaderMatrices();
+		UpdateShaderMatrices(program);
 
 		//Set up shader uniforms here
+
+		//Set up time uniform
+		glUniform1f(glGetUniformLocation(program, "time"), time);
+
 		//End setting up shaders
 
 		ro.Draw();

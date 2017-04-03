@@ -2,11 +2,11 @@
 
 #include "common.h"
 #include "../NCLGL/nclgl/Matrix4.h"
-#include "../NCLGL/nclgl/Mesh.h"
-#include "../NCLGL/nclgl/Shader.h"
+#include "Mesh.h"
+#include "Shader.h"
 #include "../NCLGL/nclgl/OGLRenderer.h"
 
-//#pragma comment(lib, "nclgl.lib")
+#pragma comment(lib, "nclgl.lib")
 
 class RenderObject{
 	public:

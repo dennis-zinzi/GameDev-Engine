@@ -10,9 +10,9 @@
 int main(){
 	//Initialize window
 	Window w("GameDev Engine", 1200, 720);
-	if(!w.HasInitialised()) {
-		return -1;
-	}
+	//if(!w.HasInitialised()) {
+	//	return -1;
+	//}
 
 	//Initialize renderer
 	Renderer renderer(w);
@@ -21,27 +21,32 @@ int main(){
 	}
 
 	//Set window to render stuff in
-	w.SetRenderer(&renderer);
+	//w.SetRenderer(&renderer);
 
 	//Create world objects here
 	//TODO - Load from text files in Game dir to dynamically create them
 	Mesh *m = Mesh::LoadMeshFile(MESH_DIR"cube.asciimesh");
+
 	Shader *s = new Shader(SHADER_DIR"BasicVert.glsl", SHADER_DIR"BasicFrag.glsl");
 
 	RenderObject ro(m, s);
-	ro.setModelMatrix(Matrix4::Translation(Vector3(0, 0, 0)) * Matrix4::Scale(Vector3(1, 1, 1)));
+	ro.setModelMatrix(Matrix4::Translation(Vector3(0, 0, -10)) * Matrix4::Scale(Vector3(1, 1, 1)));
+	RenderObject ro1(m, s);
+	ro1.setModelMatrix(Matrix4::Translation(Vector3(-1, 0, -5)) * Matrix4::Scale(Vector3(1, 1, 1)));
 
 	renderer.AddRenderObject(ro);
+	renderer.AddRenderObject(ro1);
 
-	renderer.setProjectionMatrix(Matrix4::Perspective(1, 100, 1.33f, 45.0f));
-	renderer.setViewMatrix(Matrix4::BuildViewMatrix(Vector3(0, 0, -20), Vector3(0, 0, -10)));
+	renderer.SetProjectionMatrix(Matrix4::Perspective(1, 100, 1.33f, 45.0f));
+	//renderer.setViewMatrix(Matrix4::BuildViewMatrix(Vector3(0, 0, -20), Vector3(0, 0, -10)));
+	renderer.SetViewMatrix(Matrix4::BuildViewMatrix(Vector3(0, 0, 0), Vector3(0, 0, -10)));
 
 
-	while(w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)){
+	while(w.UpdateWindow() && !Keyboard::KeyDown(KEY_ESCAPE)){
 		float msec = w.GetTimer()->GetTimedMS();
 
 		
-		ro.setModelMatrix(ro.getModelMatrix() * Matrix4::Rotation(1.0f * msec, Vector3(0, 1, 1)));
+		ro.setModelMatrix(ro.getModelMatrix() * Matrix4::Rotation(0.1f * msec, Vector3(0, 1, 1)));
 
 		//Graphics update
 		renderer.UpdateScene(msec);
@@ -51,8 +56,8 @@ int main(){
 	}
 
 	//TODO - delete all pointers to avoid memory leaks
-	delete &renderer;
-	
+	delete m;
+	delete s;
 
 	return 0;
 }
