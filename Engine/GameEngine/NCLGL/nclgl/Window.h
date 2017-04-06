@@ -26,12 +26,16 @@ public:
 
 	bool	UpdateWindow();	
 
-	HWND	GetHandle() { return windowHandle; }
+	inline HWND	GetHandle() { return windowHandle; }
 
 	void RegisterResizeCallback(ResizeCallbackFunction func);
 
-	GameTimer* GetTimer() {
+	inline GameTimer* GetTimer() {
 		return &timer;
+	}
+
+	inline bool HasInitialised() {
+		return hasInit;
 	}
 protected:
 	void CheckMessages(MSG &msg);

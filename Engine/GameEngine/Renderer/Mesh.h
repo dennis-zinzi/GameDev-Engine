@@ -56,6 +56,9 @@ class Mesh	{
 	//Generates quad patch
 	static Mesh* GenerateQuadPatch();
 
+	//Generates segmented quad
+	static Mesh* GenerateSegmentedQuads(unsigned int numSegments);
+
 	GLuint	type;	//Primitive type for this mesh (GL_TRIANGLES...etc)
 
 	protected:

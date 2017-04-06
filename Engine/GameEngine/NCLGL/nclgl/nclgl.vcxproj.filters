@@ -19,6 +19,7 @@
     <ClCompile Include="Quaternion.cpp">
       <Filter>Maths</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
@@ -52,6 +53,7 @@
     <ClInclude Include="InputDevice.h">
       <Filter>Input</Filter>
     </ClInclude>
+    <ClInclude Include="Camera.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Maths">

@@ -144,6 +144,37 @@ Mesh* Mesh::GenerateQuadPatch(){
 	return m;
 }
 
+Mesh* Mesh::GenerateSegmentedQuads(unsigned int numSegments){
+	Mesh *m = new Mesh;
+	m->numVertices = 2 * numSegments;
+	m->type = GL_TRIANGLE_STRIP;
+
+	int numVertices = m->numVertices;
+	m->vertices = new Vector3[numVertices];
+	m->textureCoords = new Vector2[numVertices];
+	m->colours = new Vector4[numVertices];
+
+	for(int i = 0; i < numVertices; i+=2){
+		m->vertices[i] = Vector3(-1.0f, i, 0.0f);
+		m->vertices[i + 1] = Vector3(1.0f, i, 0.0f);
+
+		m->textureCoords[i] = Vector2(0.0f, i);
+		m->textureCoords[i + 1] = Vector2(1.0f, i);
+
+		int jointNum = i / 2;
+
+		m->colours[i] = Vector4(jointNum, jointNum - 1, 0.5f, 0.5f);
+		m->colours[i + 1] = Vector4(jointNum, jointNum - 1, 0.5f, 0.5f);
+	}
+
+	m->colours[0] = Vector4(0.0f, 0.0f, 0.5f, 0.5f);
+	m->colours[1] = Vector4(0.0f, 0.0f, 0.5f, 0.5f);
+
+	m->BufferData();
+
+	return m;
+}
+
 Mesh*	Mesh::LoadMeshFile(const string &filename) {
 	ifstream f(filename);
 

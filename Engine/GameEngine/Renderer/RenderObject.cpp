@@ -22,7 +22,8 @@ RenderObject::~RenderObject(){
 
 void RenderObject::Update(float msec){
 	if(parent){
-		worldTransform = parent->modelMatrix * modelMatrix;
+		//worldTransform = parent->modelMatrix * modelMatrix;
+		worldTransform = parent->worldTransform * modelMatrix;
 	}
 	else{
 		worldTransform = modelMatrix;

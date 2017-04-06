@@ -125,14 +125,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ChildMeshInterface.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="OBJMesh.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderObject.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="OBJMesh.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderObject.cpp" />
     <ClCompile Include="Shader.cpp" />

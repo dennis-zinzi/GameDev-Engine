@@ -39,6 +39,10 @@ class RenderObject{
 			return worldTransform;
 		}
 
+		inline void setWorldTransform(Matrix4 mat){
+			worldTransform = mat;
+		}
+
 		inline Matrix4 getModelMatrix() const{
 			return modelMatrix;
 		}
