@@ -20,6 +20,9 @@ class Renderer : public OGLRenderer{
 			root->AddChild(ro);
 		}
 
+		//void DrawSphere(btRigidBody *sphere);
+		//void DrawPlane(btRigidBody *plane);
+
 		void RotateObject(char dir);
 		void ScaleObject(char dir);
 		void MoveObject(float units, char axis);

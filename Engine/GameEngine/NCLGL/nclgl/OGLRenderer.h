@@ -63,6 +63,10 @@ public:
 		viewMatrix = m;
 	}
 
+	inline Matrix4 GetViewMatrix(){
+		return viewMatrix;
+	}
+
 	void	ClearBuffers();
 	
 protected:

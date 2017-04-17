@@ -93,3 +93,72 @@ GLuint Renderer::LoadTexture(string filename){
 	return SOIL_load_OGL_texture(filename.c_str(), SOIL_LOAD_AUTO,
 		SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
 }
+
+///**
+// * Draws a sphere using OpenGL
+// */
+//void Renderer::DrawSphere(btRigidBody *sphere){
+//	if(sphere->getCollisionShape()->getShapeType() != SPHERE_SHAPE_PROXYTYPE){
+//		//If not a sphere, nothing to render here
+//		return;
+//	}
+//
+//	//Set sphere color
+//	glColor3f(0.5f, 0.5f, 0.5f);
+//	
+//	float radius = ((btSphereShape*)sphere->getCollisionShape())->getRadius();
+//	
+//	//Get translation/rotation
+//	btTransform t;
+//	sphere->getMotionState()->getWorldTransform(t);
+//
+//	float mat[16];
+//	t.getOpenGLMatrix(mat);
+//	
+//	glPushMatrix();
+//	
+//	//Multiplies mvp by model matrix
+//	glMultMatrixf(mat);
+//	//GLUquadric *quad = gluNewQuadric();
+//	//gluSphere(quad, radius, 20.0f, 20.0f);
+//	
+//	glPopMatrix();
+//}
+//
+//
+///**
+//* Draws a plane using OpenGL
+//*/
+//void Renderer::DrawPlane(btRigidBody *plane){
+//	if(plane->getCollisionShape()->getShapeType() != STATIC_PLANE_PROXYTYPE){
+//		//If not a plane, nothing to render here
+//		return;
+//	}
+//
+//	//Set plane color
+//	glColor3f(0.5f, 0.5f, 0.5f);
+//	
+//	//Get translation/rotation
+//	btTransform t;
+//	plane->getMotionState()->getWorldTransform(t);
+//
+//	float mat[16];
+//	t.getOpenGLMatrix(mat);
+//
+//	glPushMatrix();
+//
+//	//Multiplies mvp by model matrix
+//	glMultMatrixf(mat);
+//	{
+//		glBegin(GL_QUADS);
+//		glVertex3f(-1000.0f, 0, 1000.0f);
+//		glVertex3f(-1000.0f, 0, -1000.0f);
+//		glVertex3f(1000.0f, 0, -1000.0f);
+//		glVertex3f(1000.0f, 0, 1000.0f);
+//		glEnd();
+//	}
+//	//GLUquadric *quad = gluNewQuadric();
+//	//gluSphere(quad, radius, 20.0f, 20.0f);
+//
+//	glPopMatrix();
+//}

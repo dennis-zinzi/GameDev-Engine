@@ -1,7 +1,6 @@
 #include "../Renderer/Renderer.h"
 #include "../Renderer/OBJMesh.h"
 
-#pragma comment(lib, "nclgl.lib")
 #pragma comment(lib, "Renderer.lib")
 
 #define SHADER_DIR "../Assets/Shaders/"
@@ -40,7 +39,7 @@ int main(){
 
 
 	RenderObject body(m, s);
-	body.setModelMatrix(Matrix4::Translation(Vector3(0, 0.0f, -30.0f)) * Matrix4::Scale(Vector3(1.0f, 2.0f, 1)));
+	body.setModelMatrix(Matrix4::Translation(Vector3(0, -3.0f, -30.0f)) * Matrix4::Scale(Vector3(1.0f, 2.0f, 1)));
 	renderer.AddRenderObject(body);
 
 	RenderObject head(m, s);
@@ -74,6 +73,10 @@ int main(){
 	//renderer.setViewMatrix(Matrix4::BuildViewMatrix(Vector3(0, 0, -20), Vector3(0, 0, -10)));
 	renderer.SetViewMatrix(Matrix4::BuildViewMatrix(Vector3(0, 0, 0), Vector3(0, 0, -10)));
 
+	//Physics physics;
+	//renderer.DrawPlane(physics.getRigidBodies()[0]);
+	//btRigidBody* sphere = physics.addSphere(10.0f, 0.0f, 0.0f, -10.0f, 1.0f);
+	//renderer.DrawSphere(sphere);
 
 	while(w.UpdateWindow() && !Keyboard::KeyDown(KEY_ESCAPE)){
 		float msec = w.GetTimer()->GetTimedMS();
@@ -86,10 +89,16 @@ int main(){
 		//rLeg.setModelMatrix(rLeg.getModelMatrix() * Matrix4::Rotation(0.1f * msec, Vector3(1, 0, 0)));
 
 		if(Keyboard::KeyDown(KEY_D)){
-			body.setModelMatrix(body.getModelMatrix() * Matrix4::Translation(Vector3(1, 0, 0)));
+			body.setModelMatrix(body.getModelMatrix() * Matrix4::Translation(Vector3(0.01f, 0, 0)));
+			renderer.SetViewMatrix(/*renderer.GetViewMatrix() * */Matrix4::Translation(Vector3(1, 0, 0)));
 		}
 		if(Keyboard::KeyDown(KEY_A)){
-			body.setModelMatrix(body.getModelMatrix() * Matrix4::Translation(Vector3(-1, 0, 0)));
+			body.setModelMatrix(body.getModelMatrix() * Matrix4::Translation(Vector3(-0.01f, 0, 0)));
+			renderer.SetViewMatrix(body.getModelMatrix());///*renderer.GetViewMatrix() * */Matrix4::Translation(Vector3(-1, 0, 0)));
+		}
+		if(Keyboard::KeyDown(KEY_W)){
+			lLeg.setModelMatrix(lLeg.getModelMatrix() * Matrix4::Rotation(0.1f * -msec, Vector3(1, 0, 0)));
+			renderer.SetViewMatrix(body.getModelMatrix());///*renderer.GetViewMatrix() * */Matrix4::Translation(Vector3(-1, 0, 0)));
 		}
 
 		//rLeg.setModelMatrix(rLeg.getWorldTransform() * Matrix4::Rotation(0.1f * -msec, Vector3(0, 1, 0)));
@@ -99,6 +108,7 @@ int main(){
 		//body.getChildren()[2]->setWorldTransform(body.getChildren()[2]->getWorldTransform() * Matrix4::Rotation(0.1f * msec, Vector3(1, 0, 0)));
 
 		//Graphics update
+		
 		renderer.UpdateScene(msec);
 		renderer.ClearBuffers();
 		renderer.RenderScene();
