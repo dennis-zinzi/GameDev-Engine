@@ -4,7 +4,10 @@
 #include "../NCLGL/nclgl/Camera.h"
 #include "RenderObject.h"
 
+#include "../bullet3-2.86.1/src/btBulletDynamicsCommon.h"
+
 #pragma comment(lib, "nclgl.lib")
+#pragma comment(lib, "PhysicsSystem.lib")
 
 class Renderer : public OGLRenderer{
 	public:
@@ -20,12 +23,16 @@ class Renderer : public OGLRenderer{
 			root->AddChild(ro);
 		}
 
-		//void DrawSphere(btRigidBody *sphere);
-		//void DrawPlane(btRigidBody *plane);
+		void DrawSphere(btRigidBody *sphere);
+		void DrawPlane(btRigidBody *plane);
 
 		void RotateObject(char dir);
 		void ScaleObject(char dir);
 		void MoveObject(float units, char axis);
+
+		inline RenderObject* getRenderRoot() const{
+			return root;
+		}
 
 	protected:
 		//Missing in PDF (Might move to RenderObject class)

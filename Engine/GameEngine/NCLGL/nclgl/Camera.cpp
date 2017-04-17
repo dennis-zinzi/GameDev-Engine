@@ -11,14 +11,31 @@ void Camera::UpdateCamera(float msec){
 	yaw -= Mouse::GetRelativePosition().x;
 
 	//Bounds check the pitch, to be between straight up and straight down ;)
-	pitch = min(pitch,90.0f);
-	pitch = max(pitch,-90.0f);
+	pitch = min(pitch, 20.0f);
+	pitch = max(pitch, -20.0f);
 
-	if(yaw <0) {
-		yaw += 360.0f;
+	yaw = min(yaw, 20.0f);
+	yaw = max(yaw, -20.0f);
+
+	//if(yaw < 90) {
+	//	yaw += 90.0f;
+	//}
+	//if(yaw > 90) {
+	//	yaw -= 90.0f;
+	//}
+
+	if(Keyboard::KeyDown(KEY_D)){
+		position += Vector3(0.01f, 0, 0);
 	}
-	if(yaw > 360.0f) {
-		yaw -= 360.0f;
+	if(Keyboard::KeyDown(KEY_A)){
+		position -= Vector3(0.01f, 0, 0);
+	}
+
+	if(Keyboard::KeyDown(KEY_W)){
+		position += Vector3(0.0f, 0.0f, 0.01f);
+	}
+	if(Keyboard::KeyDown(KEY_S)){
+		position -= Vector3(0.0f, 0.0f, 0.01f);
 	}
 
 	//this->position += position * 0.1f;
@@ -59,7 +76,7 @@ straight to the shader...it's already an 'inverse camera' matrix.
 Matrix4 Camera::BuildViewMatrix()	{
 	//Why do a complicated matrix inversion, when we can just generate the matrix
 	//using the negative values ;). The matrix multiplication order is important!
-	return	Matrix4::Rotation(-pitch, Vector3(1,0,0)) * 
-			Matrix4::Rotation(-yaw, Vector3(0,1,0)) * 
-			Matrix4::Translation(-position);
+	return	Matrix4::Rotation(-pitch, Vector3(1, 0, 0)) *
+		Matrix4::Rotation(-yaw, Vector3(0, 1, 0)) * 
+		Matrix4::Translation(-position);
 };
